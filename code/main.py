@@ -2,7 +2,8 @@ import sys
 
 import pygame
 from player import Player
-from settings import WINDOW_HEIGHT, WINDOW_WIDTH, PATHS
+from settings import PATHS, WINDOW_HEIGHT, WINDOW_WIDTH
+from sprites import AllSprites
 
 
 class Game:
@@ -15,11 +16,11 @@ class Game:
         self.clock = pygame.Clock()
         
         # Groups
-        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites = AllSprites()
         self.setup()
     
     def setup(self):
-        Player(pos=(200, 200), groups=self.all_sprites, path=PATHS['player'], collision_sprites=None)
+        self.player = Player(pos=(200, 200), groups=self.all_sprites, path=PATHS['player'], collision_sprites=None)
     
     def run(self):
         while True:
@@ -36,8 +37,7 @@ class Game:
             self.all_sprites.update(dt)
             
             # Draw groups
-            self.screen.fill(color='black')
-            self.all_sprites.draw(surface=self.screen)
+            self.all_sprites.custom_draw(player=self.player)
             
             # Update the frame
             pygame.display.update()
