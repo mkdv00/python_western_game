@@ -24,6 +24,16 @@ class Player(pygame.sprite.Sprite):
         # Collisions
         self.hitbox = self.rect.inflate(0, -self.rect.height / 2)
         self.collision_sprites = collision_sprites
+        
+        # Attack
+        self.attacking = False
+    
+    def get_state(self):
+        if self.direction.x == 0 and self.direction.y == 0:
+            self.state = self.state.split('_')[0] + "_idle"
+        
+        if self.attacking:
+            self.state = self.state.split('_')[0] + "_attack"
     
     def import_assets(self, path):
         self.animations = {}
@@ -42,25 +52,31 @@ class Player(pygame.sprite.Sprite):
     def input(self):
         keys = pygame.key.get_pressed()
         
-        # Horizontal direction
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self.direction.x = 1
-            self.state = 'right'
-        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self.direction.x = -1
-            self.state = 'left'
-        else:
-            self.direction.x = 0
+        if not self.attacking:
+            # Horizontal direction
+            if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                self.direction.x = 1
+                self.state = 'right'
+            elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                self.direction.x = -1
+                self.state = 'left'
+            else:
+                self.direction.x = 0
+            
+            # Vertical direction
+            if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                self.direction.y = 1
+                self.state = 'down'
+            elif keys[pygame.K_UP] or keys[pygame.K_w]:
+                self.direction.y = -1
+                self.state = 'up'
+            else:
+                self.direction.y = 0
         
-        # Vertical direction
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            self.direction.y = 1
-            self.state = 'down'
-        elif keys[pygame.K_UP] or keys[pygame.K_w]:
-            self.direction.y = -1
-            self.state = 'up'
-        else:
-            self.direction.y = 0
+        if keys[pygame.K_SPACE]:
+            self.attacking = True
+            self.direction = Vector2()
+            self.frame_index = 0
     
     def move(self, dt):
         if self.direction.magnitude():
@@ -86,11 +102,15 @@ class Player(pygame.sprite.Sprite):
         self.frame_index += 7 * dt
         if self.frame_index >= len(current_animation):
             self.frame_index = 0
+            
+            if self.attacking:
+                self.attacking = False
         
         self.image = current_animation[int(self.frame_index)]
     
     def update(self, dt):
         self.input()
+        self.get_state()
         self.move(dt)
         self.animate(dt)
         
