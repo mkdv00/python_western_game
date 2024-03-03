@@ -73,7 +73,7 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.direction.y = 0
         
-        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_SPACE] and not self.attacking:
             self.attacking = True
             self.direction = Vector2()
             self.frame_index = 0

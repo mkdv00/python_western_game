@@ -1,9 +1,11 @@
 import sys
 
 import pygame
+from camera import AllSprites
 from player import Player
+from pytmx.util_pygame import load_pygame
 from settings import PATHS, WINDOW_HEIGHT, WINDOW_WIDTH
-from sprites import AllSprites
+from sprite import Sprite
 
 
 class Game:
@@ -20,7 +22,20 @@ class Game:
         self.setup()
     
     def setup(self):
-        self.player = Player(pos=(200, 200), groups=self.all_sprites, path=PATHS['player'], collision_sprites=None)
+        tmx_map = load_pygame(filename='data/map.tmx')
+        
+        # Fences
+        for x, y, surf in tmx_map.get_layer_by_name('Fence').tiles():
+            Sprite(pos=(x * 64, y * 64), surf=surf, groups=self.all_sprites)
+        
+        # Objects
+        for object in tmx_map.get_layer_by_name('Objects'):
+            Sprite(pos=(object.x, object.y), surf=object.image, groups=self.all_sprites)
+        
+        # Player
+        for object in tmx_map.get_layer_by_name('Entities'):
+            if object.name == 'Player':
+                self.player = Player(pos=(object.x, object.y), groups=self.all_sprites, path=PATHS['player'], collision_sprites=None)
     
     def run(self):
         while True:
