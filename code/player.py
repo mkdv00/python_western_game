@@ -22,7 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = 200
         
         # Collisions
-        self.hitbox = self.rect.inflate(0, -self.rect.height / 2)
+        self.hitbox = self.rect.inflate(-self.rect.width * 0.55, -self.rect.height / 2)
         self.collision_sprites = collision_sprites
         
         # Attack
@@ -88,6 +88,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = self.hitbox.centerx
         
         # Horizontal collision
+        self.collision(direction='horizontal')
         
         # Vertical movement
         self.pos.y += self.direction.y * self.speed * dt
@@ -95,6 +96,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centery = self.hitbox.centery
         
         # Vertical collision
+        self.collision(direction='vertical')
     
     def animate(self, dt):
         current_animation = self.animations[self.state]
@@ -107,10 +109,35 @@ class Player(pygame.sprite.Sprite):
                 self.attacking = False
         
         self.image = current_animation[int(self.frame_index)]
+        
+    def collision(self, direction):
+        for sprite in self.collision_sprites.sprites():
+            if sprite.hitbox.colliderect(self.hitbox):
+                if direction == 'horizontal':
+                    # player move right
+                    if self.direction.x > 0:
+                        self.hitbox.right = sprite.hitbox.left
+                    # player move left
+                    if self.direction.x < 0:
+                        self.hitbox.left = sprite.hitbox.right
+                        
+                    self.rect.centerx = self.hitbox.centerx
+                    self.pos.x = self.hitbox.centerx
+                else:
+                    # player move down
+                    if self.direction.y > 0:
+                        self.hitbox.bottom = sprite.hitbox.top
+                    # player move up
+                    if self.direction.y < 0:
+                        self.hitbox.top = sprite.hitbox.bottom
+                        
+                    self.rect.centery = self.hitbox.centery
+                    self.pos.y = self.hitbox.centery
+                    
     
     def update(self, dt):
         self.input()
-        self.get_state()
         self.move(dt)
+        self.get_state()
         self.animate(dt)
         
